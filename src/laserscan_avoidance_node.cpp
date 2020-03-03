@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
       ROS_ERROR("failed to start the activity");
     }
 
-    ros::Rate rate(200);
+    ros::Rate rate(50);
     while(ros::ok()) {
       rate.sleep();
       ros::spinOnce();

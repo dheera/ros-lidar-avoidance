@@ -19,9 +19,11 @@ LaserScanAvoidanceActivity::LaserScanAvoidanceActivity(ros::NodeHandle &_nh, ros
   nh_priv.param("topic_multiplier", param_topic_multiplier, (std::string)"/cmd_vel/multiplier");
   nh_priv.param("ignore_regions", param_ignore_regions, std::vector<double> {}); // xmin0, xmax0, ymin0, ymax0, xmin1, xmax1, ymin1, ymax1, ...
   nh_priv.param("angle_offset", param_angle_offset, (double)0.0);
-  nh_priv.param("position_offset_x", param_position_offset_x, (double) 0.05);
+  nh_priv.param("position_offset_x", param_position_offset_x, (double) 0.00);
   nh_priv.param("position_offset_y", param_position_offset_y, (double) 0.00);
-  nh_priv.param("avoidance_width", param_avoidance_width, 0.3);
+  nh_priv.param("avoidance_width", param_avoidance_width, 0.6);
+  nh_priv.param("distance_stop", param_distance_stop, 0.5);
+  nh_priv.param("distance_slow", param_distance_slow, 1.5);
 }
 
 bool LaserScanAvoidanceActivity::start() {
@@ -58,8 +60,13 @@ bool LaserScanAvoidanceActivity::stop() {
 }
 
 void LaserScanAvoidanceActivity::onWinning(const geometry_msgs::TwistPtr& msg) {
-  if(abs(msg->linear.x) < 0.001 && abs(msg->linear.y) < 0.001) return;
-  motion_angle = atan2(msg->linear.y, msg->linear.x);
+  // ROS_INFO_STREAM("vel = " << msg->linear.x << " " << msg->angular.z);
+  if(std::abs(msg->linear.x) < 0.001 && std::abs(msg->linear.y) < 0.001) {
+    motion_angle = 0.0; // arctan singularity
+  } else {
+    motion_angle = atan2(msg->linear.y, msg->linear.x);
+  }
+  // ROS_INFO_STREAM("motion_angle = " << motion_angle);
 }
 
 void LaserScanAvoidanceActivity::onScan(const sensor_msgs::LaserScanPtr& msg) {
@@ -72,12 +79,13 @@ void LaserScanAvoidanceActivity::onScan(const sensor_msgs::LaserScanPtr& msg) {
 
   for(i=0;i<msg->ranges.size();i++) {
     r = msg->ranges[i];
-    if(r > 0.7) continue;
 
     theta = -param_angle_offset + msg->angle_min + msg->angle_increment * i;
 
     x = r*cos(theta) - param_position_offset_x;
     y = r*sin(theta) - param_position_offset_y;
+
+    if(std::pow(x,2) + std::pow(y,2) > std::pow(param_distance_slow,2)) continue;
 
     bool ignore_point = false;
 
@@ -92,12 +100,12 @@ void LaserScanAvoidanceActivity::onScan(const sensor_msgs::LaserScanPtr& msg) {
     if(ignore_point) continue;
 
     if(cos(theta - motion_angle) > 0.5 && std::abs(r*sin(theta - motion_angle)) < param_avoidance_width/2) {
-      if(r < 0.3) {
+      if(r < param_distance_stop + 0.1) {
          ROS_WARN_STREAM_THROTTLE(2, "obstacle in path at x=" << x << " y=" << y);
       }
       multiplier_min = std::min(
               multiplier_min, 
-              pow((std::max(r, 0.25) - 0.25) / 0.7, 0.5)
+              pow((std::max(r, param_distance_stop) - param_distance_stop) / param_distance_slow, 0.5)
       );
     }
   }

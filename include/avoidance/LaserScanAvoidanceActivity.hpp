@@ -31,6 +31,8 @@ class LaserScanAvoidanceActivity {
     double param_position_offset_x;
     double param_position_offset_y;
     double param_avoidance_width;
+    double param_distance_stop;
+    double param_distance_slow;
 
     double motion_angle;
 
