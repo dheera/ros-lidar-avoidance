@@ -14,7 +14,7 @@ LaserScanAvoidanceActivity::LaserScanAvoidanceActivity(ros::NodeHandle &_nh, ros
 	nh_priv(_nh_priv)
 {
   ROS_INFO("initializing");
-  nh_priv.param("topic_vel", param_topic_vel, (std::string)"/cmd_vel");
+  nh_priv.param("topic_vel", param_topic_vel, (std::string)"/cmd_vel/managed");
   nh_priv.param("topic_scan", param_topic_scan, (std::string)"/lidar/scan");
   nh_priv.param("topic_multiplier", param_topic_multiplier, (std::string)"/cmd_vel/multiplier");
   nh_priv.param("ignore_regions", param_ignore_regions, std::vector<double> {}); // xmin0, xmax0, ymin0, ymax0, xmin1, xmax1, ymin1, ymax1, ...
