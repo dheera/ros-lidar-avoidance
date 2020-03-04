@@ -7,7 +7,7 @@ catkin_package(INCLUDE_DIRS include)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(laserscan_avoidance_node src/laserscan_avoidance_node.cpp src/LaserScanAvoidanceActivity.cpp)
+add_executable(laserscan_avoidance_node src/laserscan_avoidance_node.cpp src/laserscan_avoidance_activity.cpp)
 
 include_directories(${catkin_INCLUDE_DIRS})
 

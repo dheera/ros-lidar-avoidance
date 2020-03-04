@@ -1,9 +1,9 @@
-#include <avoidance/LaserScanAvoidanceActivity.hpp>
+#include <laserscan_avoidance_activity.h>
 
 int main(int argc, char *argv[]) {
     ros::NodeHandle *nh = NULL;
     ros::NodeHandle *nh_priv = NULL;
-    avoidance::LaserScanAvoidanceActivity* activity = NULL;
+    LaserScanAvoidanceActivity* activity = NULL;
 
     ros::init(argc, argv, "avoidance_node");
 
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         return -2;
     }
 
-    activity = new avoidance::LaserScanAvoidanceActivity(*nh, *nh_priv);
+    activity = new LaserScanAvoidanceActivity(*nh, *nh_priv);
     if(!activity) {
       ROS_FATAL("Failed to initialize activity");
       delete nh_priv;
